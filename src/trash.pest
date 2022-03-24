@@ -1,59 +1,13 @@
-
 WHITESPACE = _{ " " | "\t" | NEWLINE }
+num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
+    int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-exit_line = { "exit" }
-option = { ASCII_ALPHANUMERIC }
-dir_args = @{ "-" ~ option+ }
-dir_line = { "dir" ~ dir_args* ~ dir_name* }
-dir_char = { ASCII_ALPHANUMERIC | "." | "_" | "/" | "~"}
-dir_name = @{ dir_char+ }
+operation = _{ add | sub | mul | div | pow }
+    add = { "+" }
+    sub = { "-" }
+    mul = { "*" }
+    div = { "/" }
+    pow = { "^" }
 
-cd_line = { "cd" ~ dir_name }
-pwd_line = { "pwd" }
-clr_line = { "clr" }
-
-prog_args = @{ dir_name | ("-" ~ option+) | ASCII_ALPHANUMERIC+ | ("--" ~ option+) }
-single_prog_name = @{ ASCII_ALPHANUMERIC+ }
-prog_name = @{ (dir_name | single_prog_name) }
-prog_line = { prog_name ~ prog_args* }
-
-job_line = { "jobs" }
-back_line = { prog_line ~ "&" }
-sub_line = @{ (ASCII_ALPHANUMERIC | " " | "\t" | "." | "/" | "-" | "\"" | "'" | ":" )+ | echo_line }
-pipe_line = { sub_line ~ ("|" ~ sub_line)+ }
-exec_line = { "exec" ~ prog_line }
-number = @{ ASCII_ALPHANUMERIC+ }
-kill_line = { "kill" ~ number }
-fg_line = { "fg" ~ number }
-bg_line = { "bg" ~ number }
-time_line = { "time" }
-help_line = { "help"}
-
-static_word = @{ "'" ~ ( ASCII_ALPHANUMERIC | ":" | " " | "\t" | "." | "/" | "-" | "{" | "}" | "$" )+ ~ "'" }
-parameter_name = @{ (ASCII_ALPHANUMERIC | "_")+ }
-parameter_wrapped = { "${" ~ parameter_name ~ "}" }
-dynamic_unwrapped = { (ASCII_ALPHANUMERIC | " " | ":" | "\t" | "." | "/" | "-")+ }
-dynamic_word = { "\"" ~ ( dynamic_unwrapped | parameter_wrapped )+ ~"\""}
-echo_line = { "echo" ~ (static_word | dynamic_word)* }
-
-redir_opt = { ">>" | "<" | "(2)>>" | "(1)>>" | "(2)>" |  "(1)>" | ">" }
-redir_way = { redir_opt ~ dir_name }
-redir_line = { sub_line ~ redir_way+ }
-
-shift_number = @{ ASCII_DIGIT+ }
-shift_line = { "shift" ~ shift_number }
-
-set_line = { "set" | "environ" }
-unset_line = { "unset" ~ parameter_name }
-
-test_option = { "=" | "!=" }
-test_arg = { "-z" | "-n" }
-test_zero = { test_arg ~ dynamic_word }
-test_equal = { dynamic_word ~ test_option ~ dynamic_word }
-test_line = { "test" ~ (test_zero | test_equal)}
-
-umask_line = { "umask" }
-umask_set_line = { "umask" ~ "-S" ~ number }
-assign_line = { parameter_name ~ "=" ~ dynamic_word }
-
-line = { pipe_line | back_line | redir_line | help_line | test_line | assign_line | shift_line | unset_line | set_line | echo_line | umask_set_line | umask_line | time_line | fg_line | bg_line | kill_line | job_line | cd_line | pwd_line | dir_line | clr_line | exit_line | exec_line | prog_line }
+expr = { term ~ (operation ~ term)* }
+term = _{ num | "(" ~ expr ~ ")" }
