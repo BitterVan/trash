@@ -12,7 +12,12 @@ bi_operation = { add | sub | mul | div | pow | pip }
 
 file_name = @{ (number | "." | "/" | ASCII_ALPHA)+ }
 parameter = @{ "-"+ ~ ASCII_ALPHANUMERIC+ }
-string = @{ "\"" ~ ASCII_ALPHA* ~ "\""}
+string = @{ 
+    !(
+        "\""
+    )
+    "\"" ~ ANY* ~ "\""
+}
 
 redir_operation = { uni_redir | bi_redir}
     uni_redir = { "<" | ">" | ">>" }
