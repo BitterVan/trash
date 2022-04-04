@@ -1,0 +1,47 @@
+Some("test")
+echo "hello"
+vim test/test.rs
+1 + 2
+1 + 3 | vimOk(
+    [
+        Pair {
+            rule: expr,
+            span: Span {
+                str: "echo ",
+                start: 0,
+                end: 5,
+            },
+            inner: [
+                Pair {
+                    rule: command,
+                    span: Span {
+                        str: "echo ",
+                        start: 0,
+                        end: 5,
+                    },
+                    inner: [
+                        Pair {
+                            rule: program,
+                            span: Span {
+                                str: "echo",
+                                start: 0,
+                                end: 4,
+                            },
+                            inner: [
+                                Pair {
+                                    rule: buildin_command,
+                                    span: Span {
+                                        str: "echo",
+                                        start: 0,
+                                        end: 4,
+                                    },
+                                    inner: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+)

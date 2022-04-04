@@ -1,13 +1,46 @@
-WHITESPACE = _{ " " | "\t" | NEWLINE }
-num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
+WHITESPACE = _{ " " | "\t" | "\\" ~ NEWLINE}
+number = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
     int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 
-operation = _{ add | sub | mul | div | pow }
+bi_operation = { add | sub | mul | div | pow | pip }
     add = { "+" }
     sub = { "-" }
     mul = { "*" }
     div = { "/" }
     pow = { "^" }
+    pip = { "|" }
 
-expr = { term ~ (operation ~ term)* }
-term = _{ num | "(" ~ expr ~ ")" }
+file_name = @{ (number | "." | "/" | ASCII_ALPHA)+ }
+parameter = @{ "-"+ ~ ASCII_ALPHANUMERIC+ }
+string = @{ "\"" ~ ASCII_ALPHA* ~ "\""}
+
+redir_operation = { uni_redir | bi_redir}
+    uni_redir = { "<" | ">" | ">>" }
+    bi_redir = { "<&" | ">&" | ">>&" }
+
+redir = { redir_operation ~ file_name | ASCII_DIGIT ~ redir_operation ~ ASCII_DIGIT }
+
+expr = { term ~ (bi_operation ~ term)* }
+term = _{ (number | "(" ~ expr ~ ")" | command) }
+command = { program ~ (parameter | redir | file_name | string)* }
+program = { buildin_command | user_program }
+user_program = { file_name }
+buildin_command =  {
+        "bg"
+    |   "fg"
+    |   "exec"
+    |   "echo"
+    |   "shift"
+    |   "set"
+    |   "unset"
+    |   "export"
+    |   "umask"
+    |   "kill"
+    |   "cd"
+    |   "jobs"
+    |   "help"
+    |   "time"
+    |   "dir"
+}
+
+script = { expr ~ (NEWLINE ~ expr)* }
